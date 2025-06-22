@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🐍 Snake Game - Melody</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #111;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      color: white;
+      font-family: sans-serif;
+    }
+
+    canvas {
+      border: 2px solid #00ff99;
+      background-color: #222;
+      width: 95vmin;
+      height: 95vmin;
+      max-width: 400px;
+      max-height: 400px;
+    }
+
+    .controls {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 12px 18px;
+      background-color: #00ff99;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      flex: 1 1 40%;
+    }
+
+    .btn:active {
+      background-color: #00cc77;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🐍 Snake Game</h2>
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+  <div class="controls">
+    <button class="btn" onclick="setDirection('up')">⬆️ Up</button>
+    <button class="btn" onclick="setDirection('left')">⬅️ Left</button>
+    <button class="btn" onclick="setDirection('down')">⬇️ Down</button>
+    <button class="btn" onclick="setDirection('right')">➡️ Right</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const gridSize = 20;
+    const tileCount = canvas.width / gridSize;
+
+    let snake = [{ x: 10, y: 10 }];
+    let apple = { x: 5, y: 5 };
+    let dx = 1, dy = 0;
+    let gameOver = false;
+
+    function gameLoop() {
+      if (gameOver) return;
+
+      // Move snake
+      const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+      snake.unshift(head);
+
+      // Check if ate apple
+      if (head.x === apple.x && head.y === apple.y) {
+        apple = {
+          x: Math.floor(Math.random() * tileCount),
+          y: Math.floor(Math.random() * tileCount)
+        };
+      } else {
+        snake.pop();
+      }
+
+      // Check collision
+      if (
+        head.x < 0 || head.x >= tileCount ||
+        head.y < 0 || head.y >= tileCount ||
+        snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y)
+      ) {
+        gameOver = true;
+        alert("Game Over! 🧠 Tap OK to play again.");
+        window.location.reload();
+        return;
+      }
+
+      drawGame();
+    }
+
+    function drawGame() {
+      // Clear screen
+      ctx.fillStyle = "#222";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw snake
+      ctx.fillStyle = "#00ff99";
+      snake.forEach(segment => {
+        ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
+      });
+
+      // Draw apple
+      ctx.fillStyle = "red";
+      ctx.fillRect(apple.x * gridSize, apple.y * gridSize, gridSize - 2, gridSize - 2);
+    }
+
+    function setDirection(dir) {
+      if (dir === "up" && dy === 0) { dx = 0; dy = -1; }
+      if (dir === "down" && dy === 0) { dx = 0; dy = 1; }
+      if (dir === "left" && dx === 0) { dx = -1; dy = 0; }
+      if (dir === "right" && dx === 0) { dx = 1; dy = 0; }
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowUp") setDirection("up");
+      if (e.key === "ArrowDown") setDirection("down");
+      if (e.key === "ArrowLeft") setDirection("left");
+      if (e.key === "ArrowRight") setDirection("right");
+    });
+
+    setInterval(gameLoop, 150); // Game speed
+  </script>
+</body>
+</html>
